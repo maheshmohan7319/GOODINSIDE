@@ -1,6 +1,5 @@
 
-const Category = require('../models/category');
-const Product = require('../models//product');
+const Category = require('../models/Category');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
