@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
+const Address = require('../models/Address');
 
 
 
@@ -78,8 +79,7 @@ exports.getCart = async (req, res) => {
                 itemTotal: itemTotal.toFixed(2),
                 sgst: sgst.toFixed(2),
                 cgst: cgst.toFixed(2),
-                productImage: product.images && product.images.length > 0 ? product.images[0] : null,
-                isFavorite: user.favorites.includes(product._id)
+                productImage: product.image || null,     
             };
         });
 
@@ -105,7 +105,7 @@ exports.getCart = async (req, res) => {
             netAmount: roundedNetAmount,
             totalSGST: roundedTotalSGST,
             totalCGST: roundedTotalCGST,
-            defaultAddress: address ? address : 'No default address found'
+           defaultAddress: address ? address : 'No default address found'
         });
     } catch (err) {
         console.error(err);
@@ -114,21 +114,66 @@ exports.getCart = async (req, res) => {
 };
 
 exports.getCartByProductId = async (req, res) => {
-    try {
-        const { productId } = req.query;
-        const userId = req.user ? req.user.user.id : null;
+    const productId = req.params.id;
+    const qty = req.params.qty;
 
-        let isInCart = false;
-        if (userId) {
-            const cart = await Cart.findOne({ userId });
-            if (cart) {
-                isInCart = cart.items.some(item =>
-                    item.productId.equals(productId)
-                );
-            }
+    try {
+       
+        const product = await Product.findById(productId).populate('category');
+        if (!product) {
+            return res.status(404).json({ status: false, message: 'Product not found' });
         }
 
-        res.status(200).json({ status: true, isInCart });
+   
+        const quantity = qty;
+
+       
+        const itemTotal = product.offerPrice * quantity;
+        const sgst = itemTotal * (product.taxPercentage / 2) / 100;
+        const cgst = itemTotal * (product.taxPercentage / 2) / 100;
+        
+        const netAmount = itemTotal;
+        const totalSGST = sgst;
+        const totalCGST = cgst;
+        const totalTaxAmount = sgst + cgst;
+        const grossTotal = netAmount - totalTaxAmount;
+
+        const roundedGrossTotal = grossTotal.toFixed(2);
+        const roundedTotalTaxAmount = totalTaxAmount.toFixed(2);
+        const roundedNetAmount = netAmount.toFixed(2);
+        const roundedTotalSGST = totalSGST.toFixed(2);
+        const roundedTotalCGST = totalCGST.toFixed(2);
+
+        let defaultAddress = null;
+        if (req.user) {
+            const userId = req.user.user.id;
+            defaultAddress = await Address.findOne({ userId, isDefault: true });
+        }
+
+        const response = {
+            status: true,
+            message: 'Product details retrieved successfully',
+            product: {
+                productId: product._id,
+                productName: product.name,
+                productImage: product.image,
+                category: product.category,
+                quantity: quantity,
+                offerPrice: product.offerPrice,
+                taxPercentage: product.taxPercentage,
+                itemTotal: itemTotal.toFixed(2),
+                sgst: sgst.toFixed(2),
+                cgst: cgst.toFixed(2),
+            },
+            grossTotal: roundedGrossTotal,
+            totalTaxAmount: roundedTotalTaxAmount,
+            netAmount: roundedNetAmount,
+            totalSGST: roundedTotalSGST,
+            totalCGST: roundedTotalCGST,
+            defaultAddress: defaultAddress ? defaultAddress : 'No default address found'
+        };
+
+        res.json(response);
     } catch (err) {
         console.error(err);
         res.status(500).json({ status: false, message: 'Internal server error' });

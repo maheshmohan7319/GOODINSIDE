@@ -7,7 +7,7 @@ router.post('/', verifyToken, cartController.addItemToCart);
 
 router.get('/', verifyToken, cartController.getCart);
 
-router.get('/product', verifyToken, cartController.getCartByProductId);
+router.get('/:id/:qty', verifyToken, cartController.getCartByProductId);
 
 router.delete('/', verifyToken, cartController.removeItemFromCart);
 

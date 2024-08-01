@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Cart = require('../models/Cart');
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -43,9 +44,22 @@ exports.getProductById = async (req, res) => {
 
     const product = await productQuery.exec();
     if (!product) {
-      return res.status(404).json({ status: true, message: 'Product not found' });
+      return res.status(404).json({ status: false, message: 'Product not found' });
     }
-    res.json(product);
+
+  
+    let isCart = false;
+    if (req.user && req.user.user.id) {
+      const userId = req.user.user.id;
+      const cart = await Cart.findOne({ userId, 'items.productId': req.params.id });
+      isCart = !!cart; 
+    }
+
+    res.json({
+      status: true,
+      product: product,
+      isCart: isCart,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: false, message: 'Internal server error' });
