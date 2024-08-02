@@ -4,7 +4,7 @@ const Product = require('../models/Product');
 
 exports.createOrder = async (req, res) => {
     try {
-      const { items, paymentMethod, address } = req.body;
+      const { items, address } = req.body;
       const user = req.user.user.id;
   
       let totalAmount = 0;
@@ -44,12 +44,12 @@ exports.createOrder = async (req, res) => {
   exports.getOrders = async (req, res) => {
     try {
       const orders = await Order.find()
-        .populate('user', 'name') // Populate user details with 'name'
+        .populate('user', 'name') 
         .populate({
-          path: 'items.product', // Populate product details within items
-          select: 'name price' // Return 'name' and 'price' from Product
+          path: 'items.product', 
+          select: 'name price' 
         })
-        .populate('address'); // Populate full address details
+        .populate('address');
   
       res.status(200).json(orders);
     } catch (error) {
@@ -61,8 +61,12 @@ exports.createOrder = async (req, res) => {
 exports.getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
-      .populate('user', 'name')
-      .populate('items.product', 'name price');
+    .populate('user', 'name') 
+    .populate({
+      path: 'items.product', 
+      select: 'name price' 
+    })
+    .populate('address');
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }

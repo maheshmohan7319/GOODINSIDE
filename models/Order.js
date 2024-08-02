@@ -30,13 +30,13 @@ const orderSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
-    default: 'Pending',
+    enum: ['Ordered', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+    default: 'Ordered',
   },
   paymentMethod: {
     type: String,
     enum: ['Credit Card', 'PayPal', 'Cash on Delivery'],
-    required: true,
+    default: 'Cash on Delivery',
   },
   address: {
     type: mongoose.Schema.Types.ObjectId,
