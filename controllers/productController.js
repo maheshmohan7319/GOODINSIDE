@@ -70,7 +70,7 @@ exports.getProductById = async (req, res) => {
 exports.createProduct = [
   upload.single('image'),
   async (req, res) => {
-    const { name, description, salePrice, offerPrice, purchasePrice, category, isTaxInclusive, taxPercentage, isActive, ingredients } = req.body;
+    const { name, description, salePrice, offerPrice, purchasePrice, category, isTaxInclusive, taxPercentage, isActive, ingredients, isCombo } = req.body;
     const image = req.file ? req.file.path : null;
     const createdBy = req.user.user.id;
 
@@ -93,7 +93,8 @@ exports.createProduct = [
         updatedBy: createdBy,
         isActive,
         image,
-        ingredients: JSON.parse(ingredients || '[]'), 
+        ingredients: JSON.parse(ingredients || '[]'),
+        isCombo 
       });
       await newProduct.save();
       res.json(newProduct);
@@ -109,7 +110,7 @@ exports.updateProduct = [
   upload.single('image'),
   async (req, res) => {
     const { id } = req.params;
-    const { name, description, salePrice, offerPrice, purchasePrice, category, isTaxInclusive, taxPercentage, isActive, ingredients } = req.body;
+    const { name, description, salePrice, offerPrice, purchasePrice, category, isTaxInclusive, taxPercentage, isActive, ingredients, isCombo } = req.body;
     const updatedBy = req.user.user.id;
 
     try {
@@ -124,6 +125,7 @@ exports.updateProduct = [
       product.offerPrice = offerPrice || product.offerPrice;
       product.purchasePrice = purchasePrice || product.purchasePrice;
       product.category = category || product.category;
+      product.isCombo = isCombo || product.isCombo;
       product.isTaxInclusive = typeof isTaxInclusive !== 'undefined' ? isTaxInclusive : product.isTaxInclusive;
       product.taxPercentage = typeof taxPercentage !== 'undefined' ? taxPercentage : product.taxPercentage;
       product.isActive = typeof isActive !== 'undefined' ? isActive : product.isActive;

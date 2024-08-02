@@ -42,6 +42,10 @@ const ProductSchema = new mongoose.Schema({
       quantity: { type: String, required: true },
     }
   ],
+  isCombo: {
+    type: Boolean,
+    required: true,
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
