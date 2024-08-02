@@ -16,7 +16,6 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-
 exports.getProducts = async (req, res) => {
   try {
     let productsQuery = Product.find();
@@ -44,7 +43,6 @@ exports.getProducts = async (req, res) => {
     res.status(500).json({ status: false, message: 'Internal server error' });
   }
 };
-
 
 exports.getProductById = async (req, res) => {
   try {
@@ -74,8 +72,6 @@ exports.getProductById = async (req, res) => {
     res.status(500).json({ status: false, message: 'Internal server error' });
   }
 };
-
-
 
 exports.createProduct = [
   upload.single('image'),
@@ -114,7 +110,6 @@ exports.createProduct = [
     }
   },
 ];
-
 
 exports.updateProduct = [
   upload.single('image'),
@@ -161,7 +156,6 @@ exports.updateProduct = [
     }
   },
 ];
-
 
 exports.deleteProduct = async (req, res) => {
   const { id } = req.params;
