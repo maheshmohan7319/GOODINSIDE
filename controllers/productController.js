@@ -26,7 +26,19 @@ exports.getProducts = async (req, res) => {
     }
 
     const products = await productsQuery.exec();
-    res.json(products);
+
+    const productsWithDiscount = products.map(product => {
+      const discountPercentage = product.salePrice
+        ? ((product.salePrice - product.offerPrice) / product.salePrice) * 100
+        : 0;
+        
+      return {
+        ...product.toObject(),
+        discountPercentage: parseFloat(discountPercentage.toFixed(2))
+      };
+    });
+
+    res.json(productsWithDiscount);
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: false, message: 'Internal server error' });
@@ -47,24 +59,22 @@ exports.getProductById = async (req, res) => {
       return res.status(404).json({ status: false, message: 'Product not found' });
     }
 
-  
-    let isCart = false;
-    if (req.user && req.user.user.id) {
-      const userId = req.user.user.id;
-      const cart = await Cart.findOne({ userId, 'items.productId': req.params.id });
-      isCart = !!cart; 
-    }
+    const discountPercentage = product.salePrice
+      ? ((product.salePrice - product.offerPrice) / product.salePrice) * 100
+      : 0;
 
-    res.json({
-      status: true,
-      product: product,
-      isCart: isCart,
-    });
+    const productWithDiscount = {
+      ...product.toObject(),
+      discountPercentage: parseFloat(discountPercentage.toFixed(2)),
+    };
+
+    res.json(productWithDiscount);
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: false, message: 'Internal server error' });
   }
 };
+
 
 
 exports.createProduct = [
