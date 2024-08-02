@@ -23,6 +23,11 @@ const orderSchema = new Schema({
     ref: 'User',
     required: true,
   },
+  orderNumber: {
+    type: String,
+    unique: true,
+    required: true,
+  },
   items: [orderItemSchema],
   totalAmount: {
     type: Number,
@@ -35,8 +40,12 @@ const orderSchema = new Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['Credit Card', 'PayPal', 'Cash on Delivery'],
+    enum: ['Cash on Delivery'],
     default: 'Cash on Delivery',
+  },
+  transactionId: {
+    type: String,
+    required: function() { return this.paymentMethod !== 'Cash on Delivery'; }
   },
   address: {
     type: mongoose.Schema.Types.ObjectId,
@@ -46,6 +55,10 @@ const orderSchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  expectedDeliveryDate: {
+    type: Date,
+    required: true,
   },
   updatedAt: {
     type: Date,

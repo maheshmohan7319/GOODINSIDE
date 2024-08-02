@@ -20,6 +20,14 @@ const CartSchema = new mongoose.Schema({
         required: true,
     },
     items: [CartItemSchema],
+    deliveryCharge: {
+        type: Number,
+        default: 0,
+    },
+    distance: {
+        type: Number,
+        default: 0,
+    }
 }, { timestamps: true });
 
 const Cart = mongoose.model('Cart', CartSchema);

@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Address = require('../models/Address');
+const { calculateDistance } = require('../middleware/helper');
 
 
 
@@ -59,7 +60,6 @@ exports.getCart = async (req, res) => {
         let totalCGST = 0;
         let netAmount = 0;
 
-        const user = await User.findById(userId);
 
         const items = cart.items.map(item => {
             const product = item.productId;
@@ -92,6 +92,26 @@ exports.getCart = async (req, res) => {
         const roundedTotalCGST = totalCGST.toFixed(2);
 
         const address = await Address.findOne({ userId, isDefault: true });
+        if (!address) {
+            return res.status(404).json({ status: false, message: 'Default address not found' });
+        }
+
+  
+        const storeLatitude = 40.7128; 
+        const storeLongitude = -74.0060; 
+
+      
+        const distance = calculateDistance(
+            storeLatitude,
+            storeLongitude,
+            address.latitude,
+            address.longitude
+        );
+
+        
+        const deliveryRatePerKm = 5; 
+  
+        const deliveryCharge = Math.round(distance * deliveryRatePerKm);
 
         res.json({
             status: true,
@@ -105,7 +125,8 @@ exports.getCart = async (req, res) => {
             netAmount: roundedNetAmount,
             totalSGST: roundedTotalSGST,
             totalCGST: roundedTotalCGST,
-           defaultAddress: address ? address : 'No default address found'
+            deliveryCharge: deliveryCharge,
+            defaultAddress: address ? address : 'No default address found'
         });
     } catch (err) {
         console.error(err);
