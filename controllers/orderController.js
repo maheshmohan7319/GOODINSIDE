@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Address = require('../models/Address');
+const Cart = require('../models/Cart');
 const { calculateDistance } = require('../middleware/helper');
 
 exports.createOrder = async (req, res) => {
@@ -57,29 +58,37 @@ exports.createOrder = async (req, res) => {
     await newOrder.save();
     await Cart.findOneAndDelete({ userId: user });
 
-    res.status(201).json({ status: true, message: 'Order created successfully', order: newOrder });
+    res.status(201).json({ status: true, message: 'Order created successfully'});
   } catch (error) {
     console.log('Error creating order:', error);
     res.status(500).json({ status: false, message: 'Server error', error });
   }
 };
 
-  exports.getOrders = async (req, res) => {
-    try {
-      const orders = await Order.find()
-        .populate('user', 'name') 
-        .populate({
-          path: 'items.product', 
-          select: 'name price' 
-        })
-        .populate('address');
-  
-      res.status(200).json(orders);
-    } catch (error) {
-      res.status(500).json({ message: 'Server error', error });
+exports.getOrders = async (req, res) => {
+  try {
+    const userId = req.user ? req.user.user.id : null;
+
+    const query = userId ? { user: userId } : {};
+
+    const orders = await Order.find(query)
+      .populate('user', 'name')
+      .populate({
+        path: 'items.product',
+        select: 'name price'
+      })
+      .populate('address');
+
+    if (orders.length === 0) {
+      return res.status(404).json({ message: 'No orders found' });
     }
-  };
-  
+
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
 
 exports.getOrderById = async (req, res) => {
   try {
