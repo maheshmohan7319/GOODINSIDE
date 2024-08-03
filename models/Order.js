@@ -40,7 +40,7 @@ const orderSchema = new Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['Cash on Delivery'],
+    enum: ['Cash on Delivery', 'Credit Card', 'PayPal'],
     default: 'Cash on Delivery',
   },
   transactionId: {
@@ -63,6 +63,19 @@ const orderSchema = new Schema({
   updatedAt: {
     type: Date,
     default: Date.now,
+  },
+  trackingNumber: {
+    type: String,
+    default: null,
+  },
+  courierService: {
+    type: String,
+    enum: ['Delivery'],
+    default: null,
+  },
+  trackingUrl: {
+    type: String,
+    default: null,
   },
 }, { timestamps: true });
 

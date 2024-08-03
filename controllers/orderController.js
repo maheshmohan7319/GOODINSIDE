@@ -111,13 +111,28 @@ exports.getOrderById = async (req, res) => {
 
 exports.updateOrder = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, trackingNumber, courierService, trackingUrl } = req.body;
     const order = await Order.findById(req.params.id);
+
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
+    if (status) {
+      order.status = status;
+    }
+    
+    if (trackingNumber) {
+      order.trackingNumber = trackingNumber;
+    }
 
-    order.status = status || order.status;
+    if (courierService) {
+      order.courierService = courierService;
+    }
+
+    if (trackingUrl) {
+      order.trackingUrl = trackingUrl;
+    }
+
     order.updatedAt = Date.now();
 
     await order.save();
