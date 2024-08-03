@@ -55,6 +55,8 @@ exports.createOrder = async (req, res) => {
     });
 
     await newOrder.save();
+    await Cart.findOneAndDelete({ userId: user });
+
     res.status(201).json({ status: true, message: 'Order created successfully', order: newOrder });
   } catch (error) {
     console.log('Error creating order:', error);
