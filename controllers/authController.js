@@ -161,15 +161,9 @@ exports.getUser = async (req, res) => {
     try {
         const currentUser = await User.findById(req.user.user.id);
 
-        console.log(currentUser);
-        
-
         if (!currentUser) {
             return res.status(404).json({ message: 'User not found.' });
         }
-
-        console.log(currentUser.role);
-        
 
         if (currentUser.role === 'Admin') {
             const users = await User.find().select('-password'); 
