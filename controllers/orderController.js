@@ -67,9 +67,11 @@ exports.createOrder = async (req, res) => {
 
 exports.getOrders = async (req, res) => {
   try {
-    const userId = req.user ? req.user.user.id : null;
-
-    const query = userId ? { user: userId } : {};
+    let query = {};
+    
+    if (req.user.user.role !== 'Admin') {
+      query = { user: req.user.user.id };
+    }
 
     const orders = await Order.find(query)
       .populate('user', 'name')
@@ -88,7 +90,6 @@ exports.getOrders = async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 };
-
 
 exports.getOrderById = async (req, res) => {
   try {
