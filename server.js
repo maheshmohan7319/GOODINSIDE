@@ -36,4 +36,4 @@ app.use('/api/otp', otpRoutes);
 app.use('/api/company', companyRoutes);
 
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
