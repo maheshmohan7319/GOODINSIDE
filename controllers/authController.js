@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const Company = require('../models/Company');
 
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
@@ -62,33 +63,53 @@ exports.login = async (req, res) => {
         let user = await User.findOne({ phoneNumber });
 
         if (!user) {
-            return res.status(400).json({status : false, message: 'User not exist!' });
+            return res.status(400).json({ status: false, message: 'User not exist!' });
         }
-
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).json({status : false, message: 'Incorrect password' });
+            return res.status(400).json({ status: false, message: 'Incorrect password' });
         }
 
         const payload = {
             user: {
                 id: user.id,
-                role:user.role,
+                role: user.role,
             },
         };
 
+        let isCompany = false;
+
+        if (user.role === 'Admin') {
+            const companyDetails = await Company.findOne();
+
+            if (companyDetails) {
+                isCompany = true;
+            }
+        }
+
         jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1D' }, (err, token) => {
             if (err) throw err;
-            res.json({ token });
+
+            let response = {
+                token,
+            };
+
+
+            if (user.role === 'Admin') {
+                response.isCompany = isCompany;
+            }
+
+            res.json(response);
         });
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ status : false, message: 'Internal server error' });
+        res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };
+
 
 exports.changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
